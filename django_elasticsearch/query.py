@@ -382,13 +382,18 @@ class EsQueryset(QuerySet):
         return self
 
     def complete(self, field_name, query):
+        if self.fuzziness is None:  # beware, could be 0
+            fuzziness = getattr(settings, 'ELASTICSEARCH_FUZZINESS', 0.5)
+        else:
+            fuzziness = self.fuzziness
         resp = es_client.suggest(index=self.index,
                                  body={field_name: {
                                      "text": query,
                                      "completion": {
                                          "field": field_name,
                                          # stick to fuzziness settings
-                                         "fuzzy" : {}
+                                         "fuzzy" : {
+                                             "fuzziness": fuzziness }
                                      }}})
 
         return [r['text'] for r in resp[field_name][0]['options']]
