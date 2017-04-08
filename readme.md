@@ -192,12 +192,20 @@ The Elasticsearch manager is available from the 'es' attribute of EsIndexable Mo
 * **es.do_index**() *needs_instance*  
     Serialize and index the given instance.
   
-* **es.complete**(field_name, query)  
+* **es.complete**(field_name, query, fuzzy={})  
     Returns a list of suggestions from elasticsearch for the given field and query.
     **Note**: field_name must be present in ```Elasticsearch.completion_fields``` because it needs a specific mapping. 
     Example:
     ```
     >>>MyModel.es.complete('title', 'tset')
+    ['test',]
+    ```
+
+    The "fuzzy" argument allows you to set any of the ElasticSearch [fuzzy
+    parameters](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-suggesters-completion.html#fuzzy). Example:
+
+    ```
+    >>>MyModel.es.complete('title', 'test', fuzzy={'min_length':6})
     ['test',]
     ```
 

@@ -381,16 +381,28 @@ class EsQueryset(QuerySet):
         self.mlt_kwargs['id'] = id
         return self
 
-    def complete(self, field_name, query):
+    def complete(self, field_name, query, fuzzy={}):
+        # These are the ES defaults, with settings.ELASTICSEARCH_FUZZINESS
+        # overriding default fuzziness, and in turn being overriden locally.
+        # Pass in a dict that updates the default params, which are:
+        fuzzy_params = {
+             "fuzziness": self.fuzziness, # ("AUTO")
+             "transpositions": True,
+             "min_length": 3,
+             "prefix_length": 1,
+             "unicode_aware": False,
+             }
+        fuzzy_params.update(fuzzy)
+
         resp = es_client.suggest(index=self.index,
-                                 body={field_name: {
-                                     "text": query,
-                                     "completion": {
-                                         "field": field_name,
-                                         # stick to fuzziness settings
-                                         "fuzzy" : {
-                                             "fuzziness": self.fuzziness }
-                                     }}})
+                        body={field_name: {
+                             "text": query,
+                             "completion": {
+                                 "field": field_name,
+                                 # For ES defaults use "fuzzy": {}
+                                 "fuzzy" : fuzzy_params,
+                            }}})
+
 
         return [r['text'] for r in resp[field_name][0]['options']]
 
