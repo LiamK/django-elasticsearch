@@ -34,7 +34,12 @@ class EsQueryset(QuerySet):
             self.ordering = self.model.Elasticsearch.ordering
         else:
             self.ordering = getattr(self.model._meta, 'ordering', None)
-        self.fuzziness = fuzziness
+
+        if fuzziness is None:  # beware, could be 0
+            self.fuzziness = getattr(settings, 'ELASTICSEARCH_FUZZINESS', 0.5)
+        else:
+            self.fuzziness = fuzziness
+
         self.ndx = None
         self._query = ''
         self._deserialize = False
@@ -123,17 +128,12 @@ class EsQueryset(QuerySet):
         body = {}
         search = {}
 
-        if self.fuzziness is None:  # beware, could be 0
-            fuzziness = getattr(settings, 'ELASTICSEARCH_FUZZINESS', 0.5)
-        else:
-            fuzziness = self.fuzziness
-
         if self._query:
             search['query'] = {
                 'match': {
                     '_all': {
                         'query': self._query,
-                        'fuzziness': fuzziness
+                        'fuzziness': self.fuzziness
                     }
                 },
             }
@@ -382,10 +382,6 @@ class EsQueryset(QuerySet):
         return self
 
     def complete(self, field_name, query):
-        if self.fuzziness is None:  # beware, could be 0
-            fuzziness = getattr(settings, 'ELASTICSEARCH_FUZZINESS', 0.5)
-        else:
-            fuzziness = self.fuzziness
         resp = es_client.suggest(index=self.index,
                                  body={field_name: {
                                      "text": query,
@@ -393,7 +389,7 @@ class EsQueryset(QuerySet):
                                          "field": field_name,
                                          # stick to fuzziness settings
                                          "fuzzy" : {
-                                             "fuzziness": fuzziness }
+                                             "fuzziness": self.fuzziness }
                                      }}})
 
         return [r['text'] for r in resp[field_name][0]['options']]
