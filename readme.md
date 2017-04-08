@@ -200,7 +200,17 @@ The Elasticsearch manager is available from the 'es' attribute of EsIndexable Mo
     >>>MyModel.es.complete('title', 'tset')
     ['test',]
     ```
-  
+
+    es.complete() supports the following optional fields: payload, input,
+    output, weight.  To take advantage of them, add them as properties in
+    your EsIndexable model.  Example:
+    
+    ```
+    @property
+    def payload(self):
+        return { 'id': self.id }
+    ```
+
 * **es.do_update**()  
     Refresh the whole index of the model. This should probably be only used in a TestCase. See the [refresh api](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/indices-refresh.html).
   

@@ -280,7 +280,7 @@ class ElasticsearchManager():
         fields = self.model.Elasticsearch.completion_fields or []
         for field_name in fields:
             complete_name = "{0}_complete".format(field_name)
-            mappings[complete_name] = {"type": "completion"}
+            mappings[complete_name] = {"type": "completion", "payloads": True}
 
         return {
             self.doc_type: {

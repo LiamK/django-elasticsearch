@@ -159,7 +159,15 @@ class EsModelToJsonMixin(object):
             suggest_name = "{0}_complete".format(field_name)
             # TODO: could store the value of field_name in case it does some
             # heavy processing or db requests.
-            obj[suggest_name] = self.serialize_field(instance, field_name)
+            obj[suggest_name] = {}
+            if instance.payload:
+                obj[suggest_name]['payload'] = instance.payload
+            if instance.input:
+                obj[suggest_name]['input'] = instance.input
+            if instance.output:
+                obj[suggest_name]['output'] = instance.output
+            if instance.weight:
+                obj[suggest_name]['weight'] = instance.weight
 
         return obj
 
