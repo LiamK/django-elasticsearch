@@ -404,7 +404,10 @@ class EsQueryset(QuerySet):
                             }}})
 
 
-        return [r['text'] for r in resp[field_name][0]['options']]
+        # Return the whole structure instead of just the matching string.
+        # This behavior is required for payload to work.
+        # Previously: return [r['text'] for r in resp[field_name][0]['options']]
+        return resp[field_name][0]['options']
 
     def update(self):
         raise NotImplementedError("Db operational methods have been "
