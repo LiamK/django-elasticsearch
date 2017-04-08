@@ -222,7 +222,7 @@ class ElasticsearchManager():
     def exclude(self, **kwargs):
         return self.queryset.exclude(**kwargs)
 
-    def complete(self, field_name, query):
+    def complete(self, field_name, query, fuzzy={}):
         """
         Returns a list of close values for auto-completion
         """
@@ -232,7 +232,7 @@ class ElasticsearchManager():
                              .format(field_name))
 
         complete_name = "{0}_complete".format(field_name)
-        return self.queryset.complete(complete_name, query)
+        return self.queryset.complete(complete_name, query, fuzzy)
 
     def do_update(self):
         """
