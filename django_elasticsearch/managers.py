@@ -19,7 +19,7 @@ from django_elasticsearch.client import es_client
 # could store different sizes of numerics ?
 # Note: everything else is mapped to a string
 ELASTICSEARCH_FIELD_MAP = {
-    u'AutoField': 'long',
+    u'AutoField': 'string', # LK changed from long to string
     u'BigIntegerField': 'long',
     u'BinaryField': 'binary',
     u'BooleanField': 'boolean',
@@ -340,6 +340,9 @@ class ElasticsearchManager():
                                       doc_type=self.doc_type,
                                       body=self.make_mapping())
 
+    def delete_index(self):
+        es_client.indices.delete(self.index)
+
     def reindex_all(self, queryset=None):
         q = queryset or self.model.objects.all()
         for instance in q:
@@ -351,3 +354,9 @@ class ElasticsearchManager():
                                          ignore=404)
         self.create_index()
         self.reindex_all()
+
+    def delete_and_reindex(self, ignore=True, queryset=None):
+        self.delete_index()
+        self.create_index(ignore=ignore)
+        self.reindex_all(queryset=None)
+
